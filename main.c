@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_WORDS 15000 // banyaknya baris dalam txt
-#define WORD_LENGTH 50 // banyak kata
+#define MAX_WORDS 130000 // Banyaknya baris dalam txt
+#define WORD_LENGTH 50 // Panjang kata
 
 typedef struct {
     char word[WORD_LENGTH];
@@ -31,13 +31,16 @@ void load_words(const char *filename) { // Membuka file
     fclose(file);
 }
 
-int find_word(const char *word) {
-    for (int i = 0; i < word_count; ++i) {
-        if (strcmp(word, words[i].word) == 0) {
-            return i;
-        }
+int calculate_distance(const char *word1, const char *word2) {
+    int len1 = strlen(word1);
+    int len2 = strlen(word2);
+    int max_len = len1 > len2 ? len1 : len2;
+    int distance = 0;
+    for (int i = 0; i < max_len; i++) {
+        if (i < len1 && i < len2 && word1[i] != word2[i])
+            distance++;
     }
-    return -1;
+    return distance;
 }
 
 void auto_correct(const char *word) {
@@ -45,13 +48,7 @@ void auto_correct(const char *word) {
     int min_index = -1;
 
     for (int i = 0; i < word_count; ++i) {
-        int distance = 0;
-        for (int j = 0; j < WORD_LENGTH && word[j] != '\0' && words[i].word[j] != '\0'; ++j) {
-            if(word[j] != words[i].word[j]) {
-                distance++;
-            }
-        }
-
+        int distance = calculate_distance(word, words[i].word);
         if (distance < min_distance) {
             min_distance = distance;
             min_index = i;
@@ -61,11 +58,20 @@ void auto_correct(const char *word) {
     if (min_index != -1) {
         printf("Did you mean:\n");
         int angka = 0;
-        for (int i = 0; i < 5 && min_index + i < word_count; ++i)
+        for (int i = min_index; i < min_index + 5 && i < word_count; ++i)
         {
-            printf("%d. %s\n", angka+=1, words[min_index+i].word);
+            printf("%d. %s\n", angka+=1, words[i].word);
         }
     }
+}
+
+int find_word(const char *word) {
+    for (int i = 0; i < word_count; ++i) {
+        if (strcmp(word, words[i].word) == 0) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 void check_word(const char *word) {
@@ -81,30 +87,36 @@ void banner()
 {
     system("cls");
     int pil;
-    printf("\t\t\t\t==============================\n");
-    printf("\t\t\t\t||      SPELLING CHECKER    ||\n");
-    printf("\t\t\t\t||      BAHASA INDONESIA    ||\n");
+
+    printf("\033[1;36m"); // Change font color to cyan and make it bold
+    printf("\t\t\t\t==============================\n"); 
+    printf("\t\t\t\t|| SPELLING CHECKER ||\n"); 
+    printf("\t\t\t\t|| BAHASA INDONESIA ||\n"); 
     printf("\t\t\t\t==============================\n");
     printf(" Masukkan Pilihan menu yang ada ingin cari :\n");
-    printf("1. Cek Ejaan \n");
-    printf("2. Cek Kesalahan pada kalimat \n");
-    printf("3. Exit \n");
+    printf("1. Cek Ejaan \n"); 
+    printf("2. Cek Kesalahan pada kalimat \n"); 
+    printf("3. Exit \n"); 
     printf("Pilihan Anda (1/2/3) : ");
     scanf("%d", &pil);
+    printf("\033[0m"); // Reset font color
+
     switch (pil)
     {
         case 1:
         {
             char input[WORD_LENGTH];
+            char pil[50];
             while (1)
             {
+                printf("\033[1;33m"); // Change font color to yellow and make it bold
                 printf("Enter a word: ");
+                printf("\033[0m"); // Reset font color
                 scanf("%s", input);
                 check_word(input);
-                printf("\nPress Enter to check another word or type 'exit' toquit: ");
-                char exit_check[WORD_LENGTH];
-                scanf("%s", exit_check);
-                if(strcmp(exit_check, "exit") == 0) {
+                printf("Ketik (T) untuk Mengakhiri atau Ketik (Y) untuk melanjutkan: ");
+                scanf("%s", pil);
+                if(strcmp("T",pil) == 0) {
                     break;
                 }
             }
