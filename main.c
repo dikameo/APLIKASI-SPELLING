@@ -2,9 +2,23 @@
 #include <stdlib.h>
 #include <stdbool.h> // Include stdbool for bool type
 #include <string.h>
+#include <math.h>
 
 #define MAX_WORDS 130000 // Banyaknya baris dalam txt
 #define WORD_LENGTH 50 // Panjang kata
+#define MAX_LINES 6
+#define MAX_LENGTH 100
+
+void load_words(const char *filename); // Deklarasi awal fungsi load_words()
+int calculate_distance(const char *word1, const char *word2); // Deklarasi awal fungsi calculate_distance()
+void auto_correct(const char *word);
+int find_word(const char *word);
+void check_word(const char *word); // Deklarasi awal fungsi check_word()
+void pengejaan_kata(char *kata); // Deklarasi awal fungsi pengejaan_kata()
+void saveHistory(char *word);
+void displayHistory();
+
+
 
 typedef struct {
     char word[WORD_LENGTH];
@@ -13,6 +27,68 @@ typedef struct {
 
 Word words[MAX_WORDS];
 int word_count = 0;
+
+void banner()
+{
+    system("cls");
+    int pil;
+    printf("\033[1;36m"); 
+    printf("\t\t\t\t==============================\n"); 
+    printf("\t\t\t\t|| SPELLING CHECKER ||\n"); 
+    printf("\t\t\t\t|| BAHASA INDONESIA ||\n"); 
+    printf("\t\t\t\t==============================\n");
+    printf(" Masukkan Pilihan menu yang ada ingin cari :\n");
+    printf("1. Cek Ejaan \n"); 
+    printf("2. Cek Histori\n"); 
+    printf("3. Exit \n"); 
+    printf("Pilihan Anda (1/2/3) : ");
+    scanf("%d", &pil);
+    printf("\033[0m"); // Reset font color
+
+    switch (pil)
+    {
+        case 1:
+        {
+            char input[WORD_LENGTH];
+            do
+            {
+                printf("\033[1;33m"); // Change font color to yellow and make it bold
+                printf("Masukkan Kata (Kembali ketik 99): ");
+                printf("\033[0m"); // Reset font color
+                scanf("%s", input);
+                if(strcmp("99",input)==0){
+                    // break;
+                    banner();
+                }else{
+                    check_word(input);
+                }
+            } while (1);
+            break;
+        }
+        case 2:{
+            char input [200];
+            displayHistory();
+            do{
+            printf("Ketik 99 untuk Kembali kemenu awal: ");
+            printf("\033[0m"); // Reset font color
+            scanf("%s",input);
+            if(strcmp("99",input)==0){
+                banner();
+            }
+            } while (strcmp("99",input)!=1);
+            break;
+            
+           
+        }
+        case 3:
+            printf("TERIMA KASIH SUDAH MENCOBA");
+            break;
+        default:
+            break;
+    }
+}
+
+
 
 void load_words(const char *filename) { // Membuka file
     FILE *file = fopen(filename, "r");
@@ -35,12 +111,25 @@ void load_words(const char *filename) { // Membuka file
 int calculate_distance(const char *word1, const char *word2) {
     int len1 = strlen(word1);
     int len2 = strlen(word2);
-    int max_len = len1 > len2 ? len1 : len2;
-    int distance = 0;
-    for (int i = 0; i < max_len; i++) {
-        if (i < len1 && i < len2 && word1[i] != word2[i])
-            distance++;
+    int **matrix = malloc((len1 + 1) * sizeof(int *));
+    for (int i = 0; i <= len1; i++) {
+        matrix[i] = malloc((len2 + 1) * sizeof(int));
+        matrix[i][0] = i;
     }
+    for (int j = 1; j <= len2; j++) {
+        matrix[0][j] = j;
+    }
+    for (int i = 1; i <= len1; i++) {
+        for (int j = 1; j <= len2; j++) {
+            int cost = (word1[i - 1] == word2[j - 1]) ? 0 : 1;
+            matrix[i][j] = fmin(fmin(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1), matrix[i - 1][j - 1] + cost);
+        }
+    }
+    int distance = matrix[len1][len2];
+    for (int i = 0; i <= len1; i++) {
+        free(matrix[i]);
+    }
+    free(matrix);
     return distance;
 }
 
@@ -80,100 +169,97 @@ void check_word(const char *word) {
     char hasil[300] = ""; 
     if (found != -1) {
         printf("Kata telah ditemukan : %s\n", words[found].word);
-        pisahkanSukuKata(words[found].word);
+        // pisahkanSukuKata(words[found].word);
+        printf("Hasil pengejaan menjadi :");
+        pengejaan_kata(words[found].word);
+        saveHistory(words[found].word);
+        // savingHistori(words[found].word);
+
+        printf("\n");
     } else {
         auto_correct(word);
     }
 }
 
-
-
-void banner()
-{
-    system("cls");
-    int pil;
-
-    printf("\033[1;36m"); // Change font color to cyan and make it bold
-    printf("\t\t\t\t==============================\n"); 
-    printf("\t\t\t\t|| SPELLING CHECKER ||\n"); 
-    printf("\t\t\t\t|| BAHASA INDONESIA ||\n"); 
-    printf("\t\t\t\t==============================\n");
-    printf(" Masukkan Pilihan menu yang ada ingin cari :\n");
-    printf("1. Cek Ejaan \n"); 
-    printf("2. Cek Kesalahan pada kalimat \n"); 
-    printf("3. Exit \n"); 
-    printf("Pilihan Anda (1/2/3) : ");
-    scanf("%d", &pil);
-    printf("\033[0m"); // Reset font color
-
-    switch (pil)
-    {
-        case 1:
-        {
-            char input[WORD_LENGTH];
-            char pil[50];
-            while (1)
-            {
-                printf("\033[1;33m"); // Change font color to yellow and make it bold
-                printf("Enter a word: ");
-                printf("\033[0m"); // Reset font color
-                scanf("%s", input);
-                check_word(input);
-                printf("Ketik (T) untuk Mengakhiri atau Ketik (Y) untuk melanjutkan: ");
-                scanf("%s", pil);
-                if(strcmp("T",pil) == 0) {
-                    break;
-                }
-            }
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-
-
-
-bool isVokal(char c) {
-    char vokal[] = "aiueoAIUEO";
-    for (int i = 0; i < strlen(vokal); i++) {
-        if (c == vokal[i]) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// Fungsi untuk memeriksa apakah karakter adalah konsonan
-bool isKonsonan(char c) {
-    if ((c >= 'a' && c <= 'z' && !isVokal(c)) || (c >= 'A' && c <= 'Z' && !isVokal(c))) {
-        return true;
-    }
-    return false;
-}
-
-// Fungsi untuk memisahkan kata menjadi suku kata
-void pisahkanSukuKata(char *kata) {
-    int len = strlen(kata);
-    for (int i = 0; i < len; i++) {
+void pengejaan_kata(char *kata) {
+    int i;
+    for (i = 0; i < strlen(kata); i++) {
         printf("%c", kata[i]);
-        
-        // Pisahkan setelah vokal diikuti konsonan ganda atau akhir string
-        if (isVokal(kata[i]) && i + 1 < len && isKonsonan(kata[i + 1])) {
-            // Jika berikutnya ada dua konsonan berturut-turut
-            if (i + 2 < len && isKonsonan(kata[i + 2])) {
-                printf("-");
-                continue;
-            }
-            // Jika berikutnya ada konsonan diikuti oleh vokal
-            else if (i + 2 < len && isVokal(kata[i + 2])) {
-                printf("-");
-            }
+        if (i != strlen(kata) - 1) {
+            printf("-");
         }
     }
-    printf("\n");
 }
+
+void saveHistory(char *word) {
+    char lines[MAX_LINES][MAX_LENGTH];
+    int lineCount = 0;
+    int i;
+
+    FILE *file = fopen("dbhistori.txt", "r");
+
+    // Membaca baris yang sudah ada dalam file
+    if (file != NULL) {
+        while (fgets(lines[lineCount], MAX_LENGTH, file) && lineCount < MAX_LINES) {
+            // Menghapus karakter newline dari string
+            lines[lineCount][strcspn(lines[lineCount], "\n")] = 0;
+            lineCount++;
+        }
+        fclose(file);
+    }
+
+    // Menyimpan string tambahan dari parameter
+    if (strlen(word) > 0 && lineCount < MAX_LINES ) {
+        strncpy(lines[lineCount], word, MAX_LENGTH - 1);
+        lines[lineCount][MAX_LENGTH - 1] = '\0'; // Memastikan string berakhir dengan null terminator
+        lineCount++;
+    }
+
+    // Menghapus string yang terlama jika jumlah baris sudah mencapai batasan
+    if (lineCount == MAX_LINES ) {
+        // Menghapus string terlama
+        for (i = 0; i < MAX_LINES - 1; i++) {
+            strcpy(lines[i], lines[i + 1]);
+        }
+        lineCount--;
+    }
+
+    // Menyimpan string ke dalam file
+    file = fopen("dbhistori.txt", "w");
+    if (file != NULL) {
+        for (i = 0; i < lineCount; i++) {
+            fprintf(file, "%s\n", lines[i]);
+        }
+        fclose(file);
+    } else {
+        printf("Gagal membuka file untuk penulisan.");
+    }
+
+    // Menampilkan hasil
+
+}
+
+void  displayHistory() {
+    char line[MAX_LENGTH];
+    FILE *file = fopen("dbhistori.txt", "r");
+
+    int count =0;
+    if (file != NULL) {
+        printf("\033[1;33m"); 
+        printf("RIWAYAT PENCARIAN : ");
+        printf("\033[0m\n");
+        while (fgets(line, MAX_LENGTH, file)) {
+            printf("\033[1;33m");
+            printf("%d. %s", count+=1,line);
+            printf("\033[0m");
+        }
+        fclose(file);
+    } else {
+        printf("Gagal membuka file untuk membaca.");
+    }
+}
+
+
 
 
 
