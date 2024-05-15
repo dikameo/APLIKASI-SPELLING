@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h> // Include stdbool for bool type
 #include <string.h>
 
 #define MAX_WORDS 130000 // Banyaknya baris dalam txt
@@ -76,12 +77,16 @@ int find_word(const char *word) {
 
 void check_word(const char *word) {
     int found = find_word(word);
+    char hasil[300] = ""; 
     if (found != -1) {
-        printf("Correct word: %s\n", words[found].word);
+        printf("Kata telah ditemukan : %s\n", words[found].word);
+        pisahkanSukuKata(words[found].word);
     } else {
         auto_correct(word);
     }
 }
+
+
 
 void banner()
 {
@@ -127,6 +132,52 @@ void banner()
             break;
     }
 }
+
+
+
+bool isVokal(char c) {
+    char vokal[] = "aiueoAIUEO";
+    for (int i = 0; i < strlen(vokal); i++) {
+        if (c == vokal[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Fungsi untuk memeriksa apakah karakter adalah konsonan
+bool isKonsonan(char c) {
+    if ((c >= 'a' && c <= 'z' && !isVokal(c)) || (c >= 'A' && c <= 'Z' && !isVokal(c))) {
+        return true;
+    }
+    return false;
+}
+
+// Fungsi untuk memisahkan kata menjadi suku kata
+void pisahkanSukuKata(char *kata) {
+    int len = strlen(kata);
+    for (int i = 0; i < len; i++) {
+        printf("%c", kata[i]);
+        
+        // Pisahkan setelah vokal diikuti konsonan ganda atau akhir string
+        if (isVokal(kata[i]) && i + 1 < len && isKonsonan(kata[i + 1])) {
+            // Jika berikutnya ada dua konsonan berturut-turut
+            if (i + 2 < len && isKonsonan(kata[i + 2])) {
+                printf("-");
+                continue;
+            }
+            // Jika berikutnya ada konsonan diikuti oleh vokal
+            else if (i + 2 < len && isVokal(kata[i + 2])) {
+                printf("-");
+            }
+        }
+    }
+    printf("\n");
+}
+
+
+
+
 
 int main() {
     load_words("dbbaru.txt");
