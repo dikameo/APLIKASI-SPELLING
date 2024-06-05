@@ -3,6 +3,7 @@
 #include <stdbool.h> // Include stdbool for bool type
 #include <string.h>
 #include <math.h>
+#define ANSI_COLOR_BLUE    "\x1b[34m"
 
 #define MAX_WORDS 130000 // Banyaknya baris dalam txt
 #define WORD_LENGTH 50 // Panjang kata
@@ -28,6 +29,70 @@ typedef struct {
 Word words[MAX_WORDS];
 int word_count = 0;
 
+void printCentered(const char *text, int width) {
+    int len = strlen(text);
+    int padding = (width - len) / 2;
+    int i;
+
+    for ( i = 0; i < padding; i++) {
+        putchar(' ');
+    }
+    printf("%s\n", text);
+}
+
+void pencarianBanner(){
+        system("cls");
+    int consoleWidth = 80; 
+    char sentence[] = "\tDalam aplikasi ini memiliki sekitar 14.000+ kosa kata yang dapat Anda gunakan untuk melakukan spelling";
+   
+   printf("\t██████╗ ███████╗███╗   ██╗ ██████╗ █████╗ ██████╗ ██╗ █████╗ ███╗   ██╗    ██╗  ██╗ █████╗ ████████╗ █████╗\n");
+   printf("\t██╔══██╗██╔════╝████╗  ██║██╔════╝██╔══██╗██╔══██╗██║██╔══██╗████╗  ██║    ██║ ██╔╝██╔══██╗╚══██╔══╝██╔══██╗\n");
+   printf("\t██████╔╝█████╗  ██╔██╗ ██║██║     ███████║██████╔╝██║███████║██╔██╗ ██║    █████╔╝ ███████║   ██║   ███████║\n");
+   printf("\t██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██╔══██║██╔══██╗██║██╔══██║██║╚██╗██║    ██╔═██╗ ██╔══██║   ██║   ██╔══██║\n");
+   printf("\t██║     ███████╗██║ ╚████║╚██████╗██║  ██║██║  ██║██║██║  ██║██║ ╚████║    ██║  ██╗██║  ██║   ██║   ██║  ██║ \n");
+   printf("\t╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝    ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝ \n");
+printf("\n\n");
+        for (int i = 0; i < strlen(sentence); i++) {
+        printf("%c", sentence[i]);
+        fflush(stdout);
+        usleep(5000); // pause for 50 milliseconds                                      
+    }
+}
+
+void intruksi(){
+
+        system("cls");
+    int consoleWidth = 80;
+    char sentence[] = "\t\t\t Berikut instruksi dari penjelasan masing-masing dalam aplikasi SPIL";
+
+   
+   printf("\t\t\t██╗███╗   ██╗███████╗████████╗██████╗ ██╗   ██╗██╗  ██╗███████╗██╗\n");
+   printf("\t\t\t██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║   ██║██║ ██╔╝██╔════╝██║\n");
+   printf("\t\t\t██║██╔██╗ ██║███████╗   ██║   ██████╔╝██║   ██║█████╔╝ ███████╗██║\n");
+   printf("\t\t\t██║██║╚██╗██║╚════██║   ██║   ██╔══██╗██║   ██║██╔═██╗ ╚════██║██║\n");
+   printf("\t\t\t██║██║ ╚████║███████║   ██║   ██║  ██║╚██████╔╝██║  ██╗███████║██║\n");
+   printf("\t\t\t╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝\n");
+
+printf("\n\n");
+
+for (int i = 0; i < strlen(sentence); i++) {
+        printf(ANSI_COLOR_BLUE "%c", sentence[i]);
+        fflush(stdout);
+        usleep(5000); // pause for 50 milliseconds
+    }
+
+printf(ANSI_COLOR_BLUE "\n\n\033[1m# CARI KATA #\033[0m\n");
+
+printf("1. Menu untuk melakukan pencarian kata");
+printf(" \n2. Klik kolom pencarian dan ketik yang ingin Anda cari kemudian klik icon pencarian untuk memulai pencarian");
+printf(" \n3. Klik icon kembali untuk mereset hasil pencarian");
+
+printf(ANSI_COLOR_BLUE "\n\n\033[1m# HISTORI #\033[0m\n");
+printf("1. Hasil pencarian yang Anda cari apabila ditemukan");
+printf(" \n2. Batas penyimpanan adalah 5 kata terbaru");
+                                                          
+}
+
 void banner()
 {
     system("cls");
@@ -40,8 +105,9 @@ void banner()
     printf(" Masukkan Pilihan menu yang ada ingin cari :\n");
     printf("1. Cek Ejaan \n"); 
     printf("2. Cek Histori\n"); 
+    printf("3. Intruksi \n"); 
     printf("3. Exit \n"); 
-    printf("Pilihan Anda (1/2/3) : ");
+    printf("Pilihan Anda (1/2/3/4) : ");
     scanf("%d", &pil);
     printf("\033[0m"); // Reset font color
 
@@ -49,11 +115,12 @@ void banner()
     {
         case 1:
         {
+            pencarianBanner();
             char input[WORD_LENGTH];
             do
             {
                 printf("\033[1;33m"); // Change font color to yellow and make it bold
-                printf("Masukkan Kata (Kembali ketik 99): ");
+                printf("\nMasukkan Kata (Kembali ketik 99): ");
                 printf("\033[0m"); // Reset font color
                 scanf("%s", input);
                 if(strcmp("99",input)==0){
@@ -81,7 +148,8 @@ void banner()
            
         }
         case 3:
-            printf("TERIMA KASIH SUDAH MENCOBA");
+            // printf("TERIMA KASIH SUDAH MENCOBA");
+            intruksi();
             break;
         default:
             break;
